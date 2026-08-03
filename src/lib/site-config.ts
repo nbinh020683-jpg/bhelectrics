@@ -37,8 +37,8 @@ export const siteConfig = {
     note: "Official BH Electrics Massachusetts electrical contractor license number.",
   },
   social: {
-    facebook: "https://www.facebook.com/",
-    instagram: "https://www.instagram.com/",
+    facebook: "https://www.facebook.com/profile.php?id=61585735293030",
+    instagram: "https://www.instagram.com/binh131114/",
     google: "https://www.google.com/maps",
   },
 } as const;
