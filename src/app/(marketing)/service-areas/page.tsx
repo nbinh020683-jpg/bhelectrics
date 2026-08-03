@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { MapPin, ArrowRight, Phone } from "@phosphor-icons/react/ssr";
 import { PageHero } from "@/components/ui/PageHero";
+import { SectionHeading } from "@/components/ui/SectionHeading";
 import { serviceAreaTowns } from "@/lib/service-areas-data";
+import { extendedCoverageTowns } from "@/lib/extended-coverage-towns";
 import { siteConfig } from "@/lib/site-config";
 import { FinalCta } from "@/components/home/FinalCta";
 
@@ -56,6 +58,28 @@ export default function ServiceAreasPage() {
               <Phone weight="fill" size={18} />
               Call {siteConfig.phone}
             </a>
+          </div>
+        </div>
+      </section>
+
+      <section className="section-y bg-surface-alt">
+        <div className="container-page">
+          <SectionHeading
+            eyebrow="Full Coverage"
+            title="All Massachusetts Communities We Serve"
+            description="Don't see your town listed with its own page yet? We likely still serve your area — give us a call to confirm."
+          />
+
+          <div className="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+            {extendedCoverageTowns.map((town) => (
+              <Link
+                key={town}
+                href="/contact"
+                className="card card-hover px-4 py-3.5 text-center text-sm font-semibold text-ink"
+              >
+                {town}, MA
+              </Link>
+            ))}
           </div>
         </div>
       </section>
