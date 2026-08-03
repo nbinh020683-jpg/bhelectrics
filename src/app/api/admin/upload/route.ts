@@ -1,21 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { randomBytes } from "node:crypto";
-import path from "node:path";
-import fs from "node:fs/promises";
-import fsSync from "node:fs";
 
 export const runtime = "nodejs";
 
-const uploadsDir = path.join(process.cwd(), "uploads", "blog");
+// Images are stored as base64 data URLs directly in the database (see
+// src/lib/blog-repository.ts) rather than on disk. Hostinger's managed
+// Node.js app hosting rebuilds the app directory on every deploy, so
+// anything written to the local filesystem at runtime would eventually be
+// lost — storing images in the database keeps them safe across redeploys.
 
-const allowedTypes: Record<string, string> = {
-  "image/jpeg": "jpg",
-  "image/png": "png",
-  "image/webp": "webp",
-  "image/gif": "gif",
-};
-
-const maxSizeBytes = 5 * 1024 * 1024; // 5MB
+const allowedTypes = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
+const maxSizeBytes = 4 * 1024 * 1024; // 4MB — kept under MySQL's default max_allowed_packet
 
 export async function POST(request: NextRequest) {
   const formData = await request.formData().catch(() => null);
@@ -25,8 +19,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "No file uploaded." }, { status: 400 });
   }
 
-  const extension = allowedTypes[file.type];
-  if (!extension) {
+  if (!allowedTypes.has(file.type)) {
     return NextResponse.json(
       { error: "Unsupported file type. Use JPG, PNG, WEBP, or GIF." },
       { status: 400 }
@@ -34,16 +27,11 @@ export async function POST(request: NextRequest) {
   }
 
   if (file.size > maxSizeBytes) {
-    return NextResponse.json({ error: "File is too large (5MB max)." }, { status: 400 });
+    return NextResponse.json({ error: "File is too large (4MB max)." }, { status: 400 });
   }
 
-  if (!fsSync.existsSync(uploadsDir)) {
-    await fs.mkdir(uploadsDir, { recursive: true });
-  }
-
-  const filename = `${Date.now()}-${randomBytes(6).toString("hex")}.${extension}`;
   const buffer = Buffer.from(await file.arrayBuffer());
-  await fs.writeFile(path.join(uploadsDir, filename), buffer);
+  const dataUrl = `data:${file.type};base64,${buffer.toString("base64")}`;
 
-  return NextResponse.json({ path: `/api/uploads/blog/${filename}` }, { status: 201 });
+  return NextResponse.json({ coverImage: dataUrl }, { status: 201 });
 }

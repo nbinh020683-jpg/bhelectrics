@@ -22,8 +22,11 @@ function formatDate(dateString: string) {
   });
 }
 
-export default function BlogPage() {
-  const posts = getPublishedPosts();
+export default async function BlogPage() {
+  const posts = await getPublishedPosts().catch((error) => {
+    console.error("Failed to load blog posts:", error);
+    return [];
+  });
 
   return (
     <>
@@ -42,10 +45,10 @@ export default function BlogPage() {
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {posts.map((post) => (
                 <Link key={post.slug} href={`/blog/${post.slug}`} className="card card-hover flex flex-col overflow-hidden">
-                  {post.coverImagePath && (
+                  {post.coverImage && (
                     <div className="relative aspect-[16/9] w-full">
                       <Image
-                        src={post.coverImagePath}
+                        src={post.coverImage}
                         alt={post.title}
                         fill
                         unoptimized

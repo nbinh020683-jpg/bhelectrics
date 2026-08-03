@@ -27,7 +27,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const posts = getAllPostsForAdmin().map((post) => ({
+  const allPosts = await getAllPostsForAdmin();
+  const posts = allPosts.map((post) => ({
     title: post.title,
     slug: post.slug,
     category: post.category,
@@ -60,16 +61,16 @@ export async function POST(request: NextRequest) {
   }
 
   const rawSlug = typeof b.slug === "string" && b.slug.trim() ? b.slug : title;
-  const uniqueSlug = ensureUniqueSlug(slugify(rawSlug) || "post");
+  const uniqueSlug = await ensureUniqueSlug(slugify(rawSlug) || "post");
 
-  const post = createPost({
+  const post = await createPost({
     slug: uniqueSlug,
     title,
     excerpt: typeof b.excerpt === "string" ? b.excerpt.trim() : "",
     metaDescription: typeof b.metaDescription === "string" ? b.metaDescription.trim() : "",
     category: typeof b.category === "string" && b.category.trim() ? b.category.trim() : "General",
     contentMarkdown,
-    coverImagePath: null,
+    coverImage: null,
     // Always draft — this endpoint can never publish directly, by design.
     status: "draft",
   });

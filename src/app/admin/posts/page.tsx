@@ -7,8 +7,8 @@ import { PostsTable } from "@/components/admin/PostsTable";
 export const metadata: Metadata = { title: "Blog Posts" };
 export const dynamic = "force-dynamic";
 
-export default function AdminPostsPage() {
-  const posts = getAllPostsForAdmin();
+export default async function AdminPostsPage() {
+  const posts = await getAllPostsForAdmin();
 
   return (
     <div>

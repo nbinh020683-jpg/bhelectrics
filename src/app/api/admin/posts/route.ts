@@ -10,7 +10,7 @@ import {
 export const runtime = "nodejs";
 
 export async function GET() {
-  return NextResponse.json({ posts: getAllPostsForAdmin() });
+  return NextResponse.json({ posts: await getAllPostsForAdmin() });
 }
 
 function validateAndNormalize(body: unknown): { input: PostInput } | { error: string } {
@@ -34,7 +34,7 @@ function validateAndNormalize(body: unknown): { input: PostInput } | { error: st
       metaDescription: typeof b.metaDescription === "string" ? b.metaDescription.trim() : "",
       category: typeof b.category === "string" && b.category.trim() ? b.category.trim() : "General",
       contentMarkdown,
-      coverImagePath: typeof b.coverImagePath === "string" && b.coverImagePath ? b.coverImagePath : null,
+      coverImage: typeof b.coverImage === "string" && b.coverImage ? b.coverImage : null,
       status,
     },
   };
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: result.error }, { status: 400 });
   }
 
-  const uniqueSlug = ensureUniqueSlug(result.input.slug);
-  const post = createPost({ ...result.input, slug: uniqueSlug });
+  const uniqueSlug = await ensureUniqueSlug(result.input.slug);
+  const post = await createPost({ ...result.input, slug: uniqueSlug });
   return NextResponse.json({ post }, { status: 201 });
 }

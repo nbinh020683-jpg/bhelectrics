@@ -1,4 +1,5 @@
-import { getDb } from "@/lib/db";
+import type { RowDataPacket } from "mysql2";
+import { getPool, ensureSchema } from "@/lib/db";
 import { slugify } from "@/lib/slugify-client";
 
 export { slugify };
@@ -13,38 +14,38 @@ export type PostRecord = {
   metaDescription: string;
   category: string;
   contentMarkdown: string;
-  coverImagePath: string | null;
+  coverImage: string | null;
   status: PostStatus;
   publishedAt: string | null;
   createdAt: string;
   updatedAt: string;
 };
 
-type PostRow = {
+interface PostRow extends RowDataPacket {
   id: number;
   slug: string;
   title: string;
-  excerpt: string;
-  meta_description: string;
+  excerpt: string | null;
+  meta_description: string | null;
   category: string;
   content_markdown: string;
-  cover_image_path: string | null;
+  cover_image: string | null;
   status: string;
   published_at: string | null;
   created_at: string;
   updated_at: string;
-};
+}
 
 function mapRow(row: PostRow): PostRecord {
   return {
     id: row.id,
     slug: row.slug,
     title: row.title,
-    excerpt: row.excerpt,
-    metaDescription: row.meta_description,
+    excerpt: row.excerpt ?? "",
+    metaDescription: row.meta_description ?? "",
     category: row.category,
     contentMarkdown: row.content_markdown,
-    coverImagePath: row.cover_image_path,
+    coverImage: row.cover_image,
     status: row.status === "published" ? "published" : "draft",
     publishedAt: row.published_at,
     createdAt: row.created_at,
@@ -58,48 +59,49 @@ export function estimateReadingTime(markdown: string): string {
   return `${minutes} min read`;
 }
 
-export function getPublishedPosts(): PostRecord[] {
-  const rows = getDb()
-    .prepare(
-      "SELECT * FROM posts WHERE status = 'published' ORDER BY published_at DESC, created_at DESC"
-    )
-    .all() as PostRow[];
+export async function getPublishedPosts(): Promise<PostRecord[]> {
+  await ensureSchema();
+  const [rows] = await getPool().query<PostRow[]>(
+    "SELECT * FROM posts WHERE status = 'published' ORDER BY published_at DESC, created_at DESC"
+  );
   return rows.map(mapRow);
 }
 
-export function getPublishedPostBySlug(slug: string): PostRecord | undefined {
-  const row = getDb()
-    .prepare("SELECT * FROM posts WHERE status = 'published' AND slug = ?")
-    .get(slug) as PostRow | undefined;
-  return row ? mapRow(row) : undefined;
+export async function getPublishedPostBySlug(slug: string): Promise<PostRecord | undefined> {
+  await ensureSchema();
+  const [rows] = await getPool().query<PostRow[]>(
+    "SELECT * FROM posts WHERE status = 'published' AND slug = ? LIMIT 1",
+    [slug]
+  );
+  return rows[0] ? mapRow(rows[0]) : undefined;
 }
 
-export function getAllPostsForAdmin(): PostRecord[] {
-  const rows = getDb()
-    .prepare("SELECT * FROM posts ORDER BY updated_at DESC")
-    .all() as PostRow[];
+export async function getAllPostsForAdmin(): Promise<PostRecord[]> {
+  await ensureSchema();
+  const [rows] = await getPool().query<PostRow[]>("SELECT * FROM posts ORDER BY updated_at DESC");
   return rows.map(mapRow);
 }
 
-export function getPostById(id: number): PostRecord | undefined {
-  const row = getDb().prepare("SELECT * FROM posts WHERE id = ?").get(id) as
-    | PostRow
-    | undefined;
-  return row ? mapRow(row) : undefined;
+export async function getPostById(id: number): Promise<PostRecord | undefined> {
+  await ensureSchema();
+  const [rows] = await getPool().query<PostRow[]>("SELECT * FROM posts WHERE id = ? LIMIT 1", [id]);
+  return rows[0] ? mapRow(rows[0]) : undefined;
 }
 
-export function isSlugTaken(slug: string, excludeId?: number): boolean {
-  const row = getDb()
-    .prepare("SELECT id FROM posts WHERE slug = ? AND id != ?")
-    .get(slug, excludeId ?? -1) as { id: number } | undefined;
-  return Boolean(row);
+export async function isSlugTaken(slug: string, excludeId?: number): Promise<boolean> {
+  await ensureSchema();
+  const [rows] = await getPool().query<RowDataPacket[]>(
+    "SELECT id FROM posts WHERE slug = ? AND id != ? LIMIT 1",
+    [slug, excludeId ?? -1]
+  );
+  return rows.length > 0;
 }
 
-export function ensureUniqueSlug(baseSlug: string, excludeId?: number): string {
+export async function ensureUniqueSlug(baseSlug: string, excludeId?: number): Promise<string> {
   const base = slugify(baseSlug) || "post";
   let candidate = base;
   let suffix = 2;
-  while (isSlugTaken(candidate, excludeId)) {
+  while (await isSlugTaken(candidate, excludeId)) {
     candidate = `${base}-${suffix}`;
     suffix += 1;
   }
@@ -113,69 +115,69 @@ export type PostInput = {
   metaDescription: string;
   category: string;
   contentMarkdown: string;
-  coverImagePath: string | null;
+  coverImage: string | null;
   status: PostStatus;
 };
 
-export function createPost(input: PostInput): PostRecord {
-  const db = getDb();
-  const now = new Date().toISOString();
-  const publishedAt = input.status === "published" ? now : null;
+export async function createPost(input: PostInput): Promise<PostRecord> {
+  await ensureSchema();
+  const pool = getPool();
+  const publishedAt = input.status === "published" ? new Date() : null;
 
-  const result = db
-    .prepare(
-      `INSERT INTO posts
-        (slug, title, excerpt, meta_description, category, content_markdown, cover_image_path, status, published_at, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-    )
-    .run(
+  const [result] = await pool.query(
+    `INSERT INTO posts
+      (slug, title, excerpt, meta_description, category, content_markdown, cover_image, status, published_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
       input.slug,
       input.title,
       input.excerpt,
       input.metaDescription,
       input.category,
       input.contentMarkdown,
-      input.coverImagePath,
+      input.coverImage,
       input.status,
       publishedAt,
-      now,
-      now
-    );
+    ]
+  );
 
-  return getPostById(Number(result.lastInsertRowid))!;
+  const insertId = (result as { insertId: number }).insertId;
+  const post = await getPostById(insertId);
+  if (!post) throw new Error("Failed to load post after insert.");
+  return post;
 }
 
-export function updatePost(id: number, input: PostInput): PostRecord | undefined {
-  const db = getDb();
-  const existing = getPostById(id);
+export async function updatePost(id: number, input: PostInput): Promise<PostRecord | undefined> {
+  await ensureSchema();
+  const existing = await getPostById(id);
   if (!existing) return undefined;
 
-  const now = new Date().toISOString();
   const publishedAt =
-    input.status === "published" ? existing.publishedAt ?? now : existing.publishedAt;
+    input.status === "published" ? existing.publishedAt ?? new Date() : existing.publishedAt;
 
-  db.prepare(
+  await getPool().query(
     `UPDATE posts SET
       slug = ?, title = ?, excerpt = ?, meta_description = ?, category = ?,
-      content_markdown = ?, cover_image_path = ?, status = ?, published_at = ?, updated_at = ?
-     WHERE id = ?`
-  ).run(
-    input.slug,
-    input.title,
-    input.excerpt,
-    input.metaDescription,
-    input.category,
-    input.contentMarkdown,
-    input.coverImagePath,
-    input.status,
-    publishedAt,
-    now,
-    id
+      content_markdown = ?, cover_image = ?, status = ?, published_at = ?
+     WHERE id = ?`,
+    [
+      input.slug,
+      input.title,
+      input.excerpt,
+      input.metaDescription,
+      input.category,
+      input.contentMarkdown,
+      input.coverImage,
+      input.status,
+      publishedAt,
+      id,
+    ]
   );
 
   return getPostById(id);
 }
 
-export function deletePost(id: number): void {
-  getDb().prepare("DELETE FROM posts WHERE id = ?").run(id);
+export async function deletePost(id: number): Promise<void> {
+  await ensureSchema();
+  await getPool().query("DELETE FROM posts WHERE id = ?", [id]);
 }

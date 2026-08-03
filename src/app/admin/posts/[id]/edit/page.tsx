@@ -12,7 +12,7 @@ export default async function EditPostPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const post = getPostById(Number(id));
+  const post = await getPostById(Number(id));
   if (!post) notFound();
 
   return (

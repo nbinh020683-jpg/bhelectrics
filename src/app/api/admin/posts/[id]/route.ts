@@ -31,7 +31,7 @@ function validateAndNormalize(body: unknown): { input: PostInput } | { error: st
       metaDescription: typeof b.metaDescription === "string" ? b.metaDescription.trim() : "",
       category: typeof b.category === "string" && b.category.trim() ? b.category.trim() : "General",
       contentMarkdown,
-      coverImagePath: typeof b.coverImagePath === "string" && b.coverImagePath ? b.coverImagePath : null,
+      coverImage: typeof b.coverImage === "string" && b.coverImage ? b.coverImage : null,
       status,
     },
   };
@@ -50,7 +50,7 @@ export async function GET(
   const id = parseId(idParam);
   if (!id) return NextResponse.json({ error: "Invalid post id." }, { status: 400 });
 
-  const post = getPostById(id);
+  const post = await getPostById(id);
   if (!post) return NextResponse.json({ error: "Post not found." }, { status: 404 });
   return NextResponse.json({ post });
 }
@@ -63,7 +63,7 @@ export async function PUT(
   const id = parseId(idParam);
   if (!id) return NextResponse.json({ error: "Invalid post id." }, { status: 400 });
 
-  const existing = getPostById(id);
+  const existing = await getPostById(id);
   if (!existing) return NextResponse.json({ error: "Post not found." }, { status: 404 });
 
   const body = await request.json().catch(() => null);
@@ -72,8 +72,8 @@ export async function PUT(
     return NextResponse.json({ error: result.error }, { status: 400 });
   }
 
-  const uniqueSlug = ensureUniqueSlug(result.input.slug, id);
-  const post = updatePost(id, { ...result.input, slug: uniqueSlug });
+  const uniqueSlug = await ensureUniqueSlug(result.input.slug, id);
+  const post = await updatePost(id, { ...result.input, slug: uniqueSlug });
   return NextResponse.json({ post });
 }
 
@@ -85,9 +85,9 @@ export async function DELETE(
   const id = parseId(idParam);
   if (!id) return NextResponse.json({ error: "Invalid post id." }, { status: 400 });
 
-  const existing = getPostById(id);
+  const existing = await getPostById(id);
   if (!existing) return NextResponse.json({ error: "Post not found." }, { status: 404 });
 
-  deletePost(id);
+  await deletePost(id);
   return NextResponse.json({ success: true });
 }

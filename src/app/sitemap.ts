@@ -6,8 +6,11 @@ import { getPublishedPosts } from "@/lib/blog-repository";
 
 export const dynamic = "force-dynamic";
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const blogPosts = getPublishedPosts();
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const blogPosts = await getPublishedPosts().catch((error) => {
+    console.error("Failed to load blog posts for sitemap:", error);
+    return [];
+  });
   const baseUrl = siteConfig.url;
   const now = new Date();
 

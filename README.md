@@ -52,7 +52,7 @@ Nothing works until you generate credentials — there is no default password.
 node scripts/generate-admin-credentials.mjs "choose-a-strong-password"
 ```
 
-This prints three lines. Paste them into `.env.local` (local dev) and into your production environment (VPS):
+This prints three lines. Paste them into `.env.local` (local dev) and into your production environment (Hostinger's Node.js app environment variables — see [Section 6](#6-deploying-to-hostinger-business-web-hosting)):
 
 ```env
 ADMIN_USERNAME=admin
@@ -66,9 +66,9 @@ Then sign in at `http://localhost:3000/admin` (or `https://bhelectrics.com/admin
 
 ### What the admin panel stores, and where
 
-- **Blog posts** live in a small SQLite database at `data/app.db` (created automatically on first run, using Node's built-in `node:sqlite` — no external database to install or pay for).
-- **Uploaded cover images** are saved to `uploads/blog/` on the server's disk and served back through `/api/uploads/...`.
-- Both `data/` and `uploads/` are gitignored on purpose — they're server state, not source code. **On your VPS, back these up periodically** (e.g. `tar -czf backup.tar.gz data uploads`) since they aren't stored in Git.
+- **Blog posts live in a MySQL database** — not a local file. This matters because Hostinger's Business Web Hosting Node.js app hosting rebuilds the app on every deploy, so anything written to the local disk at runtime would eventually be lost. A real database, hosted separately from the app code, survives every redeploy.
+- **Uploaded cover images are stored inside the database too** (as base64 data), for the same reason — no separate file storage to worry about losing.
+- See [Section 6](#6-deploying-to-hostinger-business-web-hosting) for how to create the MySQL database in hPanel and connect it.
 
 ### Changing the admin password later
 
@@ -101,14 +101,14 @@ New drafts will appear in `/admin/posts` for you to review and publish whenever 
 
 ## 4. Local Development
 
-**Requirements:** Node.js **22.5+** (this project uses Node's built-in `node:sqlite`, which needs 22.5 or later — plain Node 20 will not work) and npm.
+**Requirements:** Node.js 18.18+ and npm, plus access to a MySQL database (see below).
 
 ```bash
 npm install
 npm run dev
 ```
 
-Visit `http://localhost:3000`. To use the admin panel locally, also complete the one-time setup in [Section 3](#3-blog-admin-panel) first.
+Visit `http://localhost:3000`. Pages that don't touch the blog (home, services, contact, etc.) work immediately. To use the blog or admin panel locally, you also need a MySQL database — either install MySQL/MariaDB locally, or point `DB_HOST`/`DB_USER`/`DB_PASSWORD`/`DB_NAME` at the same Hostinger MySQL database you'll use in production (only works if remote MySQL access is enabled for that database in hPanel). Then complete the one-time admin setup in [Section 3](#3-blog-admin-panel).
 
 ```bash
 npm run build   # production build
@@ -141,98 +141,52 @@ git push -u origin main
 
 ---
 
-## 6. Deploying to Hostinger (VPS / Cloud Hosting with Node.js)
+## 6. Deploying to Hostinger (Business Web Hosting)
 
-This assumes a Hostinger **VPS** or **Cloud Hosting** plan with SSH access (required for a real Node.js server — standard shared hosting without Node.js support cannot run this site as-is).
+Business Web Hosting supports Node.js apps through hPanel's managed **Node.js Apps** feature — no SSH, no manual server setup, no PM2/Nginx. Hostinger auto-detects Next.js, runs the build, and keeps the app running, including a managed MySQL database.
 
-### One-time server setup
+### Step 1 — Create the MySQL database
 
-1. **SSH into your VPS:**
-   ```bash
-   ssh root@your-server-ip
-   ```
-2. **Install Node.js 22+ (via NodeSource)** — required for the admin panel's built-in SQLite support:
-   ```bash
-   curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
-   apt-get install -y nodejs
-   node --version   # confirm it reports v22.5.0 or higher
-   ```
-3. **Install PM2** (keeps the app running and restarts it on crash/reboot):
-   ```bash
-   npm install -g pm2
-   ```
-4. **Install Nginx** (reverse proxy from port 80/443 to the Node app):
-   ```bash
-   apt-get install -y nginx
-   ```
+1. In hPanel, go to **Databases → MySQL Databases**.
+2. Create a new database (any name, e.g. `bhelectrics`) and a database user with a strong password.
+3. Note the **host, port, database name, username, and password** hPanel gives you — you'll need all five.
 
-### Deploying the app
+### Step 2 — Deploy the Node.js app
 
-1. **Clone your repo onto the server:**
-   ```bash
-   cd /var/www
-   git clone https://github.com/<your-username>/<your-repo>.git bh-electrics
-   cd bh-electrics
-   ```
-2. **Install dependencies and build:**
-   ```bash
-   npm install
-   npm run build
-   ```
-3. **Create `/var/www/bh-electrics/.env.local`** with your real SMTP credentials and admin panel credentials (see `.env.example` and [Section 3](#3-blog-admin-panel) — run `node scripts/generate-admin-credentials.mjs "your-password"` on the server itself, or paste in values generated locally).
-4. **Start the app with PM2**:
-   ```bash
-   pm2 start npm --name "bh-electrics" -- start
-   pm2 save
-   pm2 startup   # follow the printed instructions to enable startup-on-boot
-   ```
-   The app now runs on `http://localhost:3000` on the server.
+1. In hPanel, go to **Websites → Add Website → Node.js Apps → Import Git Repository**.
+2. Authorize Hostinger's access to GitHub (or paste the public repo URL directly: `https://github.com/nbinh020683-jpg/bhelectrics`).
+3. Select the `bhelectrics` repository and the `main` branch.
+4. Hostinger should auto-detect Next.js and pre-fill the build/start commands. If it asks you to confirm or enter them manually, use:
+   - **Build command:** `npm run build`
+   - **Start command:** `npm run start`
+5. Choose a Node.js version — any of **18.x, 20.x, 22.x, 24.x** work; pick the newest available.
 
-5. **Configure Nginx as a reverse proxy** — create `/etc/nginx/sites-available/bhelectrics.com`:
-   ```nginx
-   server {
-       listen 80;
-       server_name bhelectrics.com www.bhelectrics.com;
+### Step 3 — Set environment variables
 
-       location / {
-           proxy_pass http://localhost:3000;
-           proxy_http_version 1.1;
-           proxy_set_header Upgrade $http_upgrade;
-           proxy_set_header Connection 'upgrade';
-           proxy_set_header Host $host;
-           proxy_set_header X-Real-IP $remote_addr;
-           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-           proxy_cache_bypass $http_upgrade;
-       }
-   }
-   ```
-   Enable it and restart Nginx:
-   ```bash
-   ln -s /etc/nginx/sites-available/bhelectrics.com /etc/nginx/sites-enabled/
-   nginx -t && systemctl restart nginx
-   ```
-6. **Point your domain at the VPS.** In Hostinger's DNS settings for your domain, add an `A` record pointing `@` (and `www`) to your VPS's IP address.
-7. **Enable free SSL with Certbot:**
-   ```bash
-   apt-get install -y certbot python3-certbot-nginx
-   certbot --nginx -d bhelectrics.com -d www.bhelectrics.com
-   ```
+Still in the Node.js app's setup/settings screen, find **Environment Variables**. Hostinger supports importing an entire `.env` file at once — the fastest way is:
+
+1. On your own computer, copy `.env.example` to a new file, fill in every value (the 5 database values from Step 1, your SMTP credentials, and the admin/content-bot secrets — generate those with `node scripts/generate-admin-credentials.mjs "your-password"` and the `crypto.randomBytes` command shown in `.env.example`).
+2. Use hPanel's **"Import from .env file"** option to upload or paste that filled-in file.
+3. Confirm, then deploy/restart the app so it picks up the new values.
+
+### Step 4 — Connect your domain and SSL
+
+1. In hPanel, connect the `bhelectrics.com` domain to this Node.js app (hPanel has a dedicated "Connect domain" option on the Node.js app's page — this also handles DNS if the domain is already on Hostinger).
+2. Enable free SSL for the domain from hPanel's SSL section (Hostinger issues and renews this automatically).
 
 ### Deploying updates later
 
-```bash
-cd /var/www/bh-electrics
-git pull
-npm install
-npm run build
-pm2 restart bh-electrics
-```
-
-Blog posts and uploaded images live in `data/` and `uploads/` on the server, not in Git — `git pull` never touches them, so redeploys never lose blog content. Back them up periodically anyway:
+Hostinger's GitHub integration **automatically rebuilds and redeploys on every push to `main`** — so shipping an update is just:
 
 ```bash
-tar -czf ~/bh-electrics-backup-$(date +%F).tar.gz -C /var/www/bh-electrics data uploads
+git push
 ```
+
+No manual redeploy step needed. Because blog posts and images live in MySQL (not on local disk — see [Section 3](#3-blog-admin-panel)), they're completely unaffected by these rebuilds.
+
+### If something doesn't match this guide
+
+Hostinger's hPanel UI changes over time, so exact button labels may differ slightly from what's described above. If a step doesn't look like what you see on screen, tell me what you're seeing (a screenshot helps) and I'll adjust the instructions — or check Hostinger's own [Node.js hosting help articles](https://www.hostinger.com/support/hpanel/node-js/).
 
 ---
 
@@ -252,7 +206,7 @@ tar -czf ~/bh-electrics-backup-$(date +%F).tar.gz -C /var/www/bh-electrics data 
 
 - **Next.js 15** (App Router, TypeScript)
 - **Tailwind CSS** for styling
-- **Node's built-in `node:sqlite`** for the blog database (zero external dependencies, zero hosting cost)
+- **MySQL** (via `mysql2`) for the blog database — chosen specifically because Hostinger's managed Node.js app hosting rebuilds the app directory on every deploy, so blog content needs to live somewhere that survives that
 - **jose** (JWT sessions) + **bcryptjs** for the `/admin` login
 - **react-markdown** for rendering blog post content
 - **Nodemailer** for contact form email delivery

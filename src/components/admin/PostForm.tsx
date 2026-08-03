@@ -27,8 +27,8 @@ export function PostForm({ initialPost }: { initialPost?: PostRecord }) {
   const [excerpt, setExcerpt] = useState(initialPost?.excerpt ?? "");
   const [metaDescription, setMetaDescription] = useState(initialPost?.metaDescription ?? "");
   const [contentMarkdown, setContentMarkdown] = useState(initialPost?.contentMarkdown ?? "");
-  const [coverImagePath, setCoverImagePath] = useState<string | null>(
-    initialPost?.coverImagePath ?? null
+  const [coverImage, setCoverImage] = useState<string | null>(
+    initialPost?.coverImage ?? null
   );
   const [status, setStatus] = useState<PostStatus>(initialPost?.status ?? "draft");
   const [showPreview, setShowPreview] = useState(false);
@@ -52,7 +52,7 @@ export function PostForm({ initialPost }: { initialPost?: PostRecord }) {
       const response = await fetch("/api/admin/upload", { method: "POST", body: formData });
       const data = await response.json();
       if (!response.ok) throw new Error(data?.error || "Upload failed.");
-      setCoverImagePath(data.path);
+      setCoverImage(data.coverImage);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Upload failed.");
     } finally {
@@ -72,7 +72,7 @@ export function PostForm({ initialPost }: { initialPost?: PostRecord }) {
       excerpt,
       metaDescription,
       contentMarkdown,
-      coverImagePath,
+      coverImage,
       status: nextStatus,
     };
 
@@ -212,10 +212,10 @@ export function PostForm({ initialPost }: { initialPost?: PostRecord }) {
 
         <div className="card p-6">
           <h3 className="text-sm font-bold uppercase tracking-wide text-ink-muted">Cover Image</h3>
-          {coverImagePath ? (
+          {coverImage ? (
             <div className="relative mt-4 overflow-hidden rounded-lg border border-border">
               <Image
-                src={coverImagePath}
+                src={coverImage}
                 alt="Cover"
                 width={400}
                 height={225}
@@ -224,7 +224,7 @@ export function PostForm({ initialPost }: { initialPost?: PostRecord }) {
               />
               <button
                 type="button"
-                onClick={() => setCoverImagePath(null)}
+                onClick={() => setCoverImage(null)}
                 className="absolute right-2 top-2 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-ink/70 text-white hover:bg-ink"
                 aria-label="Remove cover image"
               >
@@ -234,7 +234,7 @@ export function PostForm({ initialPost }: { initialPost?: PostRecord }) {
           ) : (
             <label className="mt-4 flex cursor-pointer flex-col items-center gap-2 rounded-lg border-2 border-dashed border-border px-4 py-8 text-center text-sm text-ink-muted hover:border-primary/40">
               {uploading ? <Spinner size={22} weight="bold" className="animate-spin" /> : <UploadSimple size={22} weight="bold" />}
-              {uploading ? "Uploading..." : "Click to upload (JPG, PNG, WEBP — 5MB max)"}
+              {uploading ? "Uploading..." : "Click to upload (JPG, PNG, WEBP — 4MB max)"}
               <input
                 type="file"
                 accept="image/jpeg,image/png,image/webp,image/gif"

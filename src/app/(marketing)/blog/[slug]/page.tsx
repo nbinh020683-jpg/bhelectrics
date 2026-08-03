@@ -16,7 +16,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const post = getPublishedPostBySlug(slug);
+  const post = await getPublishedPostBySlug(slug);
   if (!post) return {};
 
   return {
@@ -46,7 +46,7 @@ export default async function BlogPostPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const post = getPublishedPostBySlug(slug);
+  const post = await getPublishedPostBySlug(slug);
   if (!post) notFound();
 
   const articleJsonLd = {
@@ -80,9 +80,9 @@ export default async function BlogPostPage({
       <section className="section-y">
         <div className="container-page grid gap-12 lg:grid-cols-[1.1fr_0.9fr]">
           <article>
-            {post.coverImagePath && (
+            {post.coverImage && (
               <div className="relative mb-8 aspect-[16/9] w-full overflow-hidden rounded-2xl">
-                <Image src={post.coverImagePath} alt={post.title} fill unoptimized className="object-cover" />
+                <Image src={post.coverImage} alt={post.title} fill unoptimized className="object-cover" />
               </div>
             )}
             <div className="mb-8 flex items-center gap-5 border-b border-border pb-6 text-sm text-ink-muted">

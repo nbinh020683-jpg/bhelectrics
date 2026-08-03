@@ -13,10 +13,6 @@
 # production
 /build
 
-# runtime data (SQLite database + uploaded blog images — persist on the server, not in git)
-/data
-/uploads
-
 # misc
 .DS_Store
 *.pem
