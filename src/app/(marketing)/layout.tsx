@@ -2,6 +2,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { MobileCallBar } from "@/components/layout/MobileCallBar";
 import { LocalBusinessJsonLd } from "@/components/seo/LocalBusinessJsonLd";
+import { TawkChat } from "@/components/TawkChat";
 
 export default function MarketingLayout({
   children,
@@ -9,6 +10,7 @@ export default function MarketingLayout({
   return (
     <>
       <LocalBusinessJsonLd />
+      <TawkChat />
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-primary focus:px-4 focus:py-3 focus:text-white"
