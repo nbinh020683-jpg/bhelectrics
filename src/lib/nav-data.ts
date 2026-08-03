@@ -2,6 +2,7 @@ import { services } from "@/lib/services-data";
 import { serviceAreaTowns } from "@/lib/service-areas-data";
 
 export const primaryNav = [
+  { label: "Home", href: "/" },
   {
     label: "Services",
     href: "/services",
