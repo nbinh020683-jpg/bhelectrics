@@ -1,10 +1,6 @@
 import type { Metadata } from "next";
 import { Poppins, Open_Sans } from "next/font/google";
 import "./globals.css";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
-import { MobileCallBar } from "@/components/layout/MobileCallBar";
-import { LocalBusinessJsonLd } from "@/components/seo/LocalBusinessJsonLd";
 import { siteConfig } from "@/lib/site-config";
 
 const poppins = Poppins({
@@ -63,21 +59,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${poppins.variable} ${openSans.variable}`}>
-      <body className="flex min-h-screen flex-col">
-        <LocalBusinessJsonLd />
-        <a
-          href="#main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-primary focus:px-4 focus:py-3 focus:text-white"
-        >
-          Skip to main content
-        </a>
-        <Header />
-        <main id="main-content" className="flex-1">
-          {children}
-        </main>
-        <Footer />
-        <MobileCallBar />
-      </body>
+      <body className="flex min-h-screen flex-col">{children}</body>
     </html>
   );
 }

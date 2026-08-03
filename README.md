@@ -12,42 +12,103 @@ This site was built with real business info you provided (name, address, phone) 
 
 | Placeholder | File | What to do |
 |---|---|---|
-| `info@bhelectrics.com` | `src/lib/site-config.ts` | Replace with your real business email |
-| `https://www.bhelectrics.com` | `src/lib/site-config.ts` | Replace with your real domain once confirmed |
-| `License #A-XXXXX` | `src/lib/site-config.ts` | Replace with your actual MA electrical contractor license number |
+| ~~Business email~~ | `src/lib/site-config.ts` | Done — `office@bhelectrics.com` |
+| ~~Domain~~ | `src/lib/site-config.ts` | Done — `bhelectrics.com` |
+| ~~License number~~ | `src/lib/site-config.ts` | Done — `License #24113-A` |
 | Facebook / Instagram / Google links | `src/lib/site-config.ts` (`social`) | Replace with your real profile URLs |
 | Business hours | `src/lib/site-config.ts` (`hours`) | Confirm these match your actual hours |
 | Gallery photos | `src/app/gallery/page.tsx` | Currently uses styled placeholder cards — swap in real project photos when available |
 | Team photos/bios | `src/app/about/page.tsx` | Currently a placeholder card — add real photos and bios when ready |
 | Testimonials | *(intentionally not included)* | We did not fabricate customer reviews. Once you have real Google reviews, either link to them (already set up) or ask your developer to add a real testimonials section |
+| Admin panel login | `.env.local` / production env | Not set up yet — see [Section 3](#3-blog-admin-panel) to generate a real password before anyone relies on `/admin` |
 
 The Privacy Policy and Terms of Service pages are solid starting templates — **have a lawyer review them** before launch, especially around Massachusetts consumer protection requirements for home improvement contractors.
 
 ---
 
-## 2. Editing Content (No Code Changes Needed for Most Updates)
+## 2. Editing Content
 
-Almost all business content lives in a few data files under `src/lib/`, so most updates don't require touching page layouts:
+**Blog posts are managed through the admin panel** at `/admin` — no code changes or redeploys needed (see [Section 3](#3-blog-admin-panel)).
+
+Everything else lives in a few data files under `src/lib/`, so most updates don't require touching page layouts:
 
 - **`src/lib/site-config.ts`** — business name, address, phone, email, hours, license info, social links
 - **`src/lib/services-data.ts`** — every service (adds/edits automatically create a new page at `/services/[slug]`)
 - **`src/lib/service-areas-data.ts`** — every town served (adds/edits automatically create a new page at `/service-areas/[town]`)
-- **`src/lib/blog-data.ts`** — blog posts (add a new object to the array to publish a new post at `/blog/[slug]`)
 
 Adding a new service or town is as simple as adding a new entry to the relevant array — the routing, metadata, and JSON-LD are generated automatically.
 
 ---
 
-## 3. Local Development
+## 3. Blog Admin Panel
 
-**Requirements:** Node.js 20+ and npm.
+The blog has a lightweight WordPress-style admin panel at **`/admin`** — sign in, then create, edit, publish/unpublish, or delete posts with a live Markdown preview and cover-image upload. Changes appear on `/blog` immediately, with no rebuild or redeploy required.
+
+### One-time setup: create your admin login
+
+Nothing works until you generate credentials — there is no default password.
+
+```bash
+node scripts/generate-admin-credentials.mjs "choose-a-strong-password"
+```
+
+This prints three lines. Paste them into `.env.local` (local dev) and into your production environment (VPS):
+
+```env
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD_HASH=\$2b\$12\$....................................
+ADMIN_SESSION_SECRET=................................................
+```
+
+> **Important:** keep the backslashes before every `$` in `ADMIN_PASSWORD_HASH` exactly as printed. Next.js's env loader treats an unescaped `$` as the start of a variable reference and will silently corrupt the password hash without `\$`. The generator script already escapes this correctly — just paste its output as-is.
+
+Then sign in at `http://localhost:3000/admin` (or `https://bhelectrics.com/admin` in production) with the username/password you chose (not the hash).
+
+### What the admin panel stores, and where
+
+- **Blog posts** live in a small SQLite database at `data/app.db` (created automatically on first run, using Node's built-in `node:sqlite` — no external database to install or pay for).
+- **Uploaded cover images** are saved to `uploads/blog/` on the server's disk and served back through `/api/uploads/...`.
+- Both `data/` and `uploads/` are gitignored on purpose — they're server state, not source code. **On your VPS, back these up periodically** (e.g. `tar -czf backup.tar.gz data uploads`) since they aren't stored in Git.
+
+### Changing the admin password later
+
+Re-run the generator script with a new password and update the env vars — no code changes needed. If you ever suspect the session secret is compromised, generate a new `ADMIN_SESSION_SECRET` too; this immediately invalidates all existing login sessions.
+
+### Daily auto-drafted posts (optional)
+
+There's a second, separate API — `POST /api/content-bot/posts` — built specifically so a scheduled job (for example, a daily Claude Code task) can write and submit a new blog post automatically. It's intentionally limited:
+
+- Auth is a single static key (`CONTENT_BOT_API_KEY`), sent as an `X-API-Key` header — not the admin login.
+- Every post it creates is **forced to Draft**, no matter what status is sent in the request. It cannot publish, edit, or delete anything. A human still reviews and hits Publish in `/admin/posts` for every single post.
+- `GET /api/content-bot/posts` (same key) lists existing post titles/slugs, so the scheduled job can avoid repeating topics.
+
+Generate a key the same way as the other secrets:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+Add it as `CONTENT_BOT_API_KEY` in your environment (see `.env.example`).
+
+**This only runs once the site is deployed and reachable at a real URL** — a scheduled cloud job can't reach your local computer, only a live server. Once `bhelectrics.com` is live with `CONTENT_BOT_API_KEY` set, ask your developer to set up a recurring daily job that:
+1. Calls `GET https://bhelectrics.com/api/content-bot/posts` with the key to see recent topics,
+2. Writes a new, non-duplicate post in BH Electrics' voice,
+3. `POST`s it to `https://bhelectrics.com/api/content-bot/posts` with the same key.
+
+New drafts will appear in `/admin/posts` for you to review and publish whenever you're ready.
+
+---
+
+## 4. Local Development
+
+**Requirements:** Node.js **22.5+** (this project uses Node's built-in `node:sqlite`, which needs 22.5 or later — plain Node 20 will not work) and npm.
 
 ```bash
 npm install
 npm run dev
 ```
 
-Visit `http://localhost:3000`.
+Visit `http://localhost:3000`. To use the admin panel locally, also complete the one-time setup in [Section 3](#3-blog-admin-panel) first.
 
 ```bash
 npm run build   # production build
@@ -57,17 +118,18 @@ npm run lint    # check code quality
 
 ### Environment variables
 
-Copy `.env.example` to `.env.local` and fill in real values to enable the contact form's email delivery locally:
+Copy `.env.example` to `.env.local` and fill in real values:
 
 ```bash
 cp .env.example .env.local
 ```
 
-Without these set, the contact form will still validate submissions correctly but will return a friendly error instead of sending an email — this is intentional so the site never fails silently.
+- SMTP vars enable the contact form's email delivery. Without them, the form still validates submissions correctly but returns a friendly error instead of sending an email — intentional, so the site never fails silently.
+- `ADMIN_USERNAME` / `ADMIN_PASSWORD_HASH` / `ADMIN_SESSION_SECRET` enable `/admin` — see [Section 3](#3-blog-admin-panel) to generate these.
 
 ---
 
-## 4. Pushing to GitHub
+## 5. Pushing to GitHub
 
 ```bash
 git remote add origin https://github.com/<your-username>/<your-repo>.git
@@ -79,7 +141,7 @@ git push -u origin main
 
 ---
 
-## 5. Deploying to Hostinger (VPS / Cloud Hosting with Node.js)
+## 6. Deploying to Hostinger (VPS / Cloud Hosting with Node.js)
 
 This assumes a Hostinger **VPS** or **Cloud Hosting** plan with SSH access (required for a real Node.js server — standard shared hosting without Node.js support cannot run this site as-is).
 
@@ -89,10 +151,11 @@ This assumes a Hostinger **VPS** or **Cloud Hosting** plan with SSH access (requ
    ```bash
    ssh root@your-server-ip
    ```
-2. **Install Node.js 20+ (via NodeSource):**
+2. **Install Node.js 22+ (via NodeSource)** — required for the admin panel's built-in SQLite support:
    ```bash
-   curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+   curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
    apt-get install -y nodejs
+   node --version   # confirm it reports v22.5.0 or higher
    ```
 3. **Install PM2** (keeps the app running and restarts it on crash/reboot):
    ```bash
@@ -116,8 +179,8 @@ This assumes a Hostinger **VPS** or **Cloud Hosting** plan with SSH access (requ
    npm install
    npm run build
    ```
-3. **Create `/var/www/bh-electrics/.env.local`** with your real SMTP credentials (see `.env.example`).
-4. **Start the app with PM2** (this project uses `output: "standalone"` in `next.config.ts`, which produces a minimal self-contained server):
+3. **Create `/var/www/bh-electrics/.env.local`** with your real SMTP credentials and admin panel credentials (see `.env.example` and [Section 3](#3-blog-admin-panel) — run `node scripts/generate-admin-credentials.mjs "your-password"` on the server itself, or paste in values generated locally).
+4. **Start the app with PM2**:
    ```bash
    pm2 start npm --name "bh-electrics" -- start
    pm2 save
@@ -165,9 +228,15 @@ npm run build
 pm2 restart bh-electrics
 ```
 
+Blog posts and uploaded images live in `data/` and `uploads/` on the server, not in Git — `git pull` never touches them, so redeploys never lose blog content. Back them up periodically anyway:
+
+```bash
+tar -czf ~/bh-electrics-backup-$(date +%F).tar.gz -C /var/www/bh-electrics data uploads
+```
+
 ---
 
-## 6. Post-Launch SEO Checklist
+## 7. Post-Launch SEO Checklist
 
 1. **Google Business Profile** — create/claim one for BH Electrics at the exact address used on this site (`20 N Federal St, Lynn, MA 01905`) so Name/Address/Phone match exactly (critical for local SEO). Link it in `siteConfig.social.google`.
 2. **Google Search Console** — verify the domain and submit `https://www.bhelectrics.com/sitemap.xml`.
@@ -175,13 +244,17 @@ pm2 restart bh-electrics
 4. **Consistent NAP everywhere** — make sure your business Name, Address, and Phone number are written identically across Google, Facebook, Yelp, and any directories.
 5. **Real photos** — replace the gallery/about placeholders with real project and team photos as soon as available; this measurably improves trust and conversion for local service businesses.
 6. **Real reviews** — once you have Google reviews, they'll show up automatically wherever customers click "View Reviews on Google" on the site.
+7. **Blog regularly** — use `/admin` to publish new posts targeting North Shore electrical topics; fresh, relevant content is one of the strongest ongoing local-SEO signals.
 
 ---
 
 ## Tech Stack
 
-- **Next.js 15** (App Router, TypeScript, `output: "standalone"` for VPS deployment)
+- **Next.js 15** (App Router, TypeScript)
 - **Tailwind CSS** for styling
+- **Node's built-in `node:sqlite`** for the blog database (zero external dependencies, zero hosting cost)
+- **jose** (JWT sessions) + **bcryptjs** for the `/admin` login
+- **react-markdown** for rendering blog post content
 - **Nodemailer** for contact form email delivery
 - **Phosphor Icons** for all iconography (no emoji, no raster icons)
 - File-based **sitemap.xml**, **robots.txt**, and dynamic **Open Graph image** generation

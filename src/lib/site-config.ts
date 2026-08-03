@@ -7,7 +7,7 @@ export const siteConfig = {
   url: "https://www.bhelectrics.com",
   phone: "781-732-0174",
   phoneHref: "tel:+17817320174",
-  email: "info@bhelectrics.com",
+  email: "office@bhelectrics.com",
   address: {
     street: "20 N Federal St",
     city: "Lynn",
@@ -33,8 +33,8 @@ export const siteConfig = {
   founded: 2010,
   license: {
     label: "MA Electrical License",
-    number: "License #A-XXXXX",
-    note: "Provide your official MA electrical license number to replace this placeholder before launch.",
+    number: "License #24113-A",
+    note: "Official BH Electrics Massachusetts electrical contractor license number.",
   },
   social: {
     facebook: "https://www.facebook.com/",

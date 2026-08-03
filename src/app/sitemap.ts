@@ -2,9 +2,12 @@ import type { MetadataRoute } from "next";
 import { siteConfig } from "@/lib/site-config";
 import { services } from "@/lib/services-data";
 import { serviceAreaTowns } from "@/lib/service-areas-data";
-import { blogPosts } from "@/lib/blog-data";
+import { getPublishedPosts } from "@/lib/blog-repository";
+
+export const dynamic = "force-dynamic";
 
 export default function sitemap(): MetadataRoute.Sitemap {
+  const blogPosts = getPublishedPosts();
   const baseUrl = siteConfig.url;
   const now = new Date();
 
@@ -36,7 +39,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const blogRoutes: MetadataRoute.Sitemap = blogPosts.map((post) => ({
     url: `${baseUrl}/blog/${post.slug}`,
-    lastModified: post.publishedAt,
+    lastModified: post.publishedAt ?? post.updatedAt,
     changeFrequency: "yearly",
     priority: 0.5,
   }));

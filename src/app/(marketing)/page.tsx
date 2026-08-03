@@ -10,7 +10,9 @@ import { FinalCta } from "@/components/home/FinalCta";
 import { siteConfig } from "@/lib/site-config";
 
 export const metadata: Metadata = {
-  title: `${siteConfig.name} | Licensed Electrician in Lynn, MA & the North Shore`,
+  title: {
+    absolute: `${siteConfig.name} | Licensed Electrician in Lynn, MA & the North Shore`,
+  },
   description: siteConfig.description,
   alternates: { canonical: "/" },
 };

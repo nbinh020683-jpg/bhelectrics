@@ -1,15 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { CalendarBlank, Clock, Phone } from "@phosphor-icons/react/ssr";
 import { PageHero } from "@/components/ui/PageHero";
-import { RichParagraph } from "@/components/ui/RichParagraph";
-import { blogPosts, getPostBySlug } from "@/lib/blog-data";
+import { MarkdownContent } from "@/components/ui/MarkdownContent";
+import { estimateReadingTime, getPublishedPostBySlug } from "@/lib/blog-repository";
 import { siteConfig } from "@/lib/site-config";
 
-export function generateStaticParams() {
-  return blogPosts.map((post) => ({ slug: post.slug }));
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
@@ -17,24 +16,24 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const post = getPostBySlug(slug);
+  const post = getPublishedPostBySlug(slug);
   if (!post) return {};
 
   return {
     title: post.title,
-    description: post.metaDescription,
+    description: post.metaDescription || post.excerpt,
     alternates: { canonical: `/blog/${post.slug}` },
     openGraph: {
       type: "article",
       title: post.title,
-      description: post.metaDescription,
-      publishedTime: post.publishedAt,
+      description: post.metaDescription || post.excerpt,
+      publishedTime: post.publishedAt ?? undefined,
     },
   };
 }
 
 function formatDate(dateString: string) {
-  return new Date(`${dateString}T00:00:00`).toLocaleDateString("en-US", {
+  return new Date(dateString).toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -47,15 +46,16 @@ export default async function BlogPostPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const post = getPostBySlug(slug);
+  const post = getPublishedPostBySlug(slug);
   if (!post) notFound();
 
   const articleJsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: post.title,
-    description: post.metaDescription,
+    description: post.metaDescription || post.excerpt,
     datePublished: post.publishedAt,
+    dateModified: post.updatedAt,
     author: { "@type": "Organization", name: siteConfig.legalName },
     publisher: { "@type": "Organization", name: siteConfig.legalName },
   };
@@ -80,21 +80,22 @@ export default async function BlogPostPage({
       <section className="section-y">
         <div className="container-page grid gap-12 lg:grid-cols-[1.1fr_0.9fr]">
           <article>
+            {post.coverImagePath && (
+              <div className="relative mb-8 aspect-[16/9] w-full overflow-hidden rounded-2xl">
+                <Image src={post.coverImagePath} alt={post.title} fill unoptimized className="object-cover" />
+              </div>
+            )}
             <div className="mb-8 flex items-center gap-5 border-b border-border pb-6 text-sm text-ink-muted">
               <span className="flex items-center gap-1.5">
                 <CalendarBlank size={16} />
-                {formatDate(post.publishedAt)}
+                {formatDate(post.publishedAt ?? post.createdAt)}
               </span>
               <span className="flex items-center gap-1.5">
                 <Clock size={16} />
-                {post.readingTime}
+                {estimateReadingTime(post.contentMarkdown)}
               </span>
             </div>
-            <div className="space-y-5 leading-relaxed text-ink-muted">
-              {post.content.map((paragraph, i) => (
-                <RichParagraph key={i} text={paragraph} />
-              ))}
-            </div>
+            <MarkdownContent markdown={post.contentMarkdown} />
           </article>
 
           <aside className="card sticky top-28 h-fit bg-primary p-8 text-white">
