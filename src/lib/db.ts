@@ -75,6 +75,17 @@ async function initSchema(): Promise<void> {
       );
     }
   }
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS gallery_images (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      caption VARCHAR(255) NOT NULL,
+      category VARCHAR(255) NOT NULL DEFAULT 'General',
+      image_data LONGTEXT NOT NULL,
+      sort_order INT NOT NULL DEFAULT 0,
+      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `);
 }
 
 export function ensureSchema(): Promise<void> {

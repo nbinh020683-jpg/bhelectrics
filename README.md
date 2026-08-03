@@ -18,7 +18,7 @@ This site was built with real business info you provided (name, address, phone) 
 | ~~Facebook / Instagram~~ | `src/lib/site-config.ts` (`social`) | Done — real profile URLs added |
 | Google Business Profile link | `src/lib/site-config.ts` (`social.google`) | Still a generic Google Maps link — update once you create/claim a Google Business Profile (see [Section 7](#7-post-launch-seo-checklist)) |
 | Business hours | `src/lib/site-config.ts` (`hours`) | Confirm these match your actual hours |
-| Gallery photos | `src/app/gallery/page.tsx` | Currently uses styled placeholder cards — swap in real project photos when available |
+| Gallery photos | `/admin/gallery` | Upload real project photos there whenever you have them — the placeholder cards disappear automatically once you add the first one |
 | Team photos/bios | `src/app/about/page.tsx` | Currently a placeholder card — add real photos and bios when ready |
 | Testimonials | *(intentionally not included)* | We did not fabricate customer reviews. Once you have real Google reviews, either link to them (already set up) or ask your developer to add a real testimonials section |
 | ~~Admin panel login~~ | Hostinger production env | Done — working on the live site |
@@ -41,9 +41,14 @@ Adding a new service or town is as simple as adding a new entry to the relevant 
 
 ---
 
-## 3. Blog Admin Panel
+## 3. Blog & Gallery Admin Panel
 
-The blog has a lightweight WordPress-style admin panel at **`/admin`** — sign in, then create, edit, publish/unpublish, or delete posts with a live Markdown preview and cover-image upload. Changes appear on `/blog` immediately, with no rebuild or redeploy required.
+The site has a lightweight WordPress-style admin panel at **`/admin`** covering two sections (same login for both):
+
+- **Blog Posts** (`/admin/posts`) — create, edit, publish/unpublish, or delete posts with a live Markdown preview and cover-image upload. Changes appear on `/blog` immediately, with no rebuild or redeploy required.
+- **Gallery** (`/admin/gallery`) — upload project photos with a caption and category. Uploaded photos replace the placeholder cards on the public `/gallery` page automatically (as soon as at least one real photo exists, all placeholders are hidden).
+
+Both store their images as base64 data directly in MySQL for the same reason described below — no local file storage to lose on redeploy.
 
 ### One-time setup: create your admin login
 

@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { ArrowSquareOut, Newspaper } from "@phosphor-icons/react/ssr";
+import { ArrowSquareOut, Newspaper, Images } from "@phosphor-icons/react/ssr";
 import { Logo } from "@/components/ui/Logo";
 import { LogoutButton } from "@/components/admin/LogoutButton";
+import { AdminNavLink } from "@/components/admin/AdminNavLink";
 
-export default function AdminPostsLayout({
+export default function AdminDashboardLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
@@ -15,13 +16,12 @@ export default function AdminPostsLayout({
               <Logo markClassName="h-9 w-9" />
             </Link>
             <nav className="hidden items-center gap-1 sm:flex">
-              <Link
-                href="/admin/posts"
-                className="flex items-center gap-2 rounded-lg bg-primary/8 px-3.5 py-2 text-sm font-bold text-primary"
-              >
-                <Newspaper size={16} weight="fill" />
+              <AdminNavLink href="/admin/posts" icon={<Newspaper size={16} weight="fill" />}>
                 Blog Posts
-              </Link>
+              </AdminNavLink>
+              <AdminNavLink href="/admin/gallery" icon={<Images size={16} weight="fill" />}>
+                Gallery
+              </AdminNavLink>
             </nav>
           </div>
           <div className="flex items-center gap-3">
