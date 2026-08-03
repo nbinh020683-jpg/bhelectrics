@@ -149,7 +149,7 @@ Business Web Hosting supports Node.js apps through hPanel's managed **Node.js Ap
 
 1. In hPanel, go to **Databases → MySQL Databases**.
 2. Create a new database (any name, e.g. `bhelectrics`) and a database user with a strong password.
-3. Note the **host, port, database name, username, and password** hPanel gives you — you'll need all five.
+3. Hostinger prefixes both the database name and username with your account ID (e.g. typing `bhelectrics` creates `u123456789_bhelectrics`) — **use the full prefixed name**, not just what you typed, for both `DB_NAME` and `DB_USER`.
 
 ### Step 2 — Deploy the Node.js app
 
@@ -165,9 +165,9 @@ Business Web Hosting supports Node.js apps through hPanel's managed **Node.js Ap
 
 Still in the Node.js app's setup/settings screen, find **Environment Variables**. Hostinger supports importing an entire `.env` file at once — the fastest way is:
 
-1. On your own computer, copy `.env.example` to a new file, fill in every value (the 5 database values from Step 1, your SMTP credentials, and the admin/content-bot secrets — generate those with `node scripts/generate-admin-credentials.mjs "your-password"` and the `crypto.randomBytes` command shown in `.env.example`).
-2. Use hPanel's **"Import from .env file"** option to upload or paste that filled-in file.
-3. Confirm, then deploy/restart the app so it picks up the new values.
+1. On your own computer, copy `.env.example` to a new file, fill in every value (the 5 database values from Step 1 — **`DB_HOST` must be `127.0.0.1`, not `localhost`**, see the troubleshooting note below — your SMTP credentials, and the admin/content-bot secrets, generated with `node scripts/generate-admin-credentials.mjs "your-password"` and the `crypto.randomBytes` command shown in `.env.example`).
+2. Use hPanel's **"Import from .env file"** option to upload or paste that filled-in file, or add each variable individually with **"Add environment variable"**.
+3. Confirm, then go to **Deployments** and click **Redeploy** so the running app picks up the new values (editing variables alone does not restart the app).
 
 ### Step 4 — Connect your domain and SSL
 
@@ -183,6 +183,20 @@ git push
 ```
 
 No manual redeploy step needed. Because blog posts and images live in MySQL (not on local disk — see [Section 3](#3-blog-admin-panel)), they're completely unaffected by these rebuilds.
+
+### Troubleshooting: admin login or `/admin/posts` fails after deploying
+
+These are real issues hit while first deploying this app to Hostinger — check these before anything else:
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| `/admin/login` says "Invalid username or password" even with the right password | Hostinger's Environment Variables UI has been observed inserting a backslash before every `$` in a saved value, corrupting the bcrypt hash's `$2b$12$...` delimiters | Already handled automatically in code (`src/lib/admin-credentials.ts` strips `\$` back to `$` before comparing) — if you still see this, redeploy so the latest code is actually running |
+| `/admin/posts` shows "Application error... server-side exception", Runtime logs show `Error: getaddrinfo ENOTFOUND <something>` | `DB_HOST` was set to something other than a real host (e.g. left as a placeholder, or a typo) | Set `DB_HOST` to `127.0.0.1` |
+| Runtime logs show `Access denied for user '<name>'@'::1'` | `DB_HOST=localhost` resolves to the IPv6 loopback `::1` in Node, but the MySQL user is only granted access from the IPv4 loopback | Set `DB_HOST` to `127.0.0.1` instead of `localhost` |
+| Runtime logs show `Access denied for user '<short-name>'@'...'` (the username looks truncated) | `DB_USER` (or `DB_NAME`) was set to just the name typed when creating the database, missing Hostinger's account-ID prefix | Use the full `u123456789_yourname` form for both `DB_USER` and `DB_NAME` |
+| Any env var change doesn't seem to take effect | Environment variable edits don't restart the running app by themselves | Go to **Deployments** and click **Redeploy** after every env var change |
+
+If you're debugging a similar issue and need to see what the running app actually has loaded (without exposing real secrets), a temporary diagnostic endpoint pattern was used during initial setup: a `GET` route that returns each secret's *length* and *first/last 4 characters* only. Recreate one if needed (see git history for `src/app/api/debug-env/route.ts`, removed after this was resolved) — just remember to delete it again afterward.
 
 ### If something doesn't match this guide
 
