@@ -15,12 +15,13 @@ This site was built with real business info you provided (name, address, phone) 
 | ~~Business email~~ | `src/lib/site-config.ts` | Done — `office@bhelectrics.com` |
 | ~~Domain~~ | `src/lib/site-config.ts` | Done — `bhelectrics.com` |
 | ~~License number~~ | `src/lib/site-config.ts` | Done — `License #24113-A` |
-| Facebook / Instagram / Google links | `src/lib/site-config.ts` (`social`) | Replace with your real profile URLs |
+| ~~Facebook / Instagram~~ | `src/lib/site-config.ts` (`social`) | Done — real profile URLs added |
+| Google Business Profile link | `src/lib/site-config.ts` (`social.google`) | Still a generic Google Maps link — update once you create/claim a Google Business Profile (see [Section 7](#7-post-launch-seo-checklist)) |
 | Business hours | `src/lib/site-config.ts` (`hours`) | Confirm these match your actual hours |
 | Gallery photos | `src/app/gallery/page.tsx` | Currently uses styled placeholder cards — swap in real project photos when available |
 | Team photos/bios | `src/app/about/page.tsx` | Currently a placeholder card — add real photos and bios when ready |
 | Testimonials | *(intentionally not included)* | We did not fabricate customer reviews. Once you have real Google reviews, either link to them (already set up) or ask your developer to add a real testimonials section |
-| Admin panel login | `.env.local` / production env | Not set up yet — see [Section 3](#3-blog-admin-panel) to generate a real password before anyone relies on `/admin` |
+| ~~Admin panel login~~ | Hostinger production env | Done — working on the live site |
 
 The Privacy Policy and Terms of Service pages are solid starting templates — **have a lawyer review them** before launch, especially around Massachusetts consumer protection requirements for home improvement contractors.
 
