@@ -108,10 +108,10 @@ export default async function AboutPage() {
         <section className="section-y bg-surface-alt">
           <div className="container-page">
             <SectionHeading eyebrow="Our People" title="The Team Behind the Work" />
-            <div className="mt-14 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
+            <div className="mt-14 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
               {teamMembers.map((member) => (
-                <div key={member.id} className="card p-6 text-center">
-                  <div className="relative mx-auto h-24 w-24 overflow-hidden rounded-full bg-primary/8">
+                <div key={member.id} className="card overflow-hidden text-center">
+                  <div className="relative aspect-square w-full bg-primary/8">
                     {member.photoData ? (
                       <Image
                         src={member.photoData}
@@ -122,15 +122,17 @@ export default async function AboutPage() {
                       />
                     ) : (
                       <span className="flex h-full w-full items-center justify-center text-primary">
-                        <User size={36} weight="fill" />
+                        <User size={64} weight="fill" />
                       </span>
                     )}
                   </div>
-                  <p className="mt-4 font-bold text-ink">{member.name}</p>
-                  {member.role && <p className="text-sm text-primary">{member.role}</p>}
-                  {member.bio && (
-                    <p className="mt-2 text-sm leading-relaxed text-ink-muted">{member.bio}</p>
-                  )}
+                  <div className="p-6">
+                    <p className="text-lg font-bold text-ink">{member.name}</p>
+                    {member.role && <p className="text-sm text-primary">{member.role}</p>}
+                    {member.bio && (
+                      <p className="mt-2 text-sm leading-relaxed text-ink-muted">{member.bio}</p>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
