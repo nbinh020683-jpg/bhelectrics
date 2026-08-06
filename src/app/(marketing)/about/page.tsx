@@ -82,20 +82,20 @@ export default async function AboutPage() {
                 highest safety standard. See the team below.
               </p>
             </div>
+          ) : placeholderImage ? (
+            <div className="card relative aspect-[4/3] w-full overflow-hidden">
+              <Image
+                src={placeholderImage}
+                alt="BH Electrics"
+                fill
+                unoptimized
+                className="object-cover"
+              />
+            </div>
           ) : (
             <div className="card flex flex-col items-center justify-center gap-4 bg-surface-alt p-10 text-center">
-              <span className="relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-primary/8 text-primary">
-                {placeholderImage ? (
-                  <Image
-                    src={placeholderImage}
-                    alt="BH Electrics"
-                    fill
-                    unoptimized
-                    className="object-cover"
-                  />
-                ) : (
-                  <Users size={40} weight="duotone" />
-                )}
+              <span className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/8 text-primary">
+                <Users size={40} weight="duotone" />
               </span>
               <p className="font-bold text-ink">Meet the Team</p>
               <p className="max-w-xs text-sm text-ink-muted">
