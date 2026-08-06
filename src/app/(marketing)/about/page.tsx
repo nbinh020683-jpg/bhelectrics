@@ -108,31 +108,39 @@ export default async function AboutPage() {
         <section className="section-y bg-surface-alt">
           <div className="container-page">
             <SectionHeading eyebrow="Our People" title="The Team Behind the Work" />
-            <div className="mt-14 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-14 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {teamMembers.map((member) => (
-                <div key={member.id} className="card overflow-hidden text-center">
-                  <div className="relative aspect-square w-full bg-primary/8">
-                    {member.photoData ? (
-                      <Image
-                        src={member.photoData}
-                        alt={member.name}
-                        fill
-                        unoptimized
-                        className="object-cover"
-                      />
-                    ) : (
-                      <span className="flex h-full w-full items-center justify-center text-primary">
-                        <User size={64} weight="fill" />
-                      </span>
-                    )}
+                <div key={member.id} className="card group relative aspect-[3/4] overflow-hidden">
+                  {member.photoData ? (
+                    <Image
+                      src={member.photoData}
+                      alt={member.name}
+                      fill
+                      unoptimized
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-primary/8 text-primary">
+                      <User size={64} weight="fill" />
+                    </div>
+                  )}
+
+                  {member.role && (
+                    <span className="absolute left-4 top-4 rounded-full bg-accent px-3 py-1 text-xs font-semibold text-white shadow">
+                      {member.role}
+                    </span>
+                  )}
+
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent px-4 pb-4 pt-12 text-left transition-opacity duration-300 group-hover:opacity-0">
+                    <p className="text-lg font-bold text-white">{member.name}</p>
                   </div>
-                  <div className="p-6">
-                    <p className="text-lg font-bold text-ink">{member.name}</p>
-                    {member.role && <p className="text-sm text-primary">{member.role}</p>}
-                    {member.bio && (
-                      <p className="mt-2 text-sm leading-relaxed text-ink-muted">{member.bio}</p>
-                    )}
-                  </div>
+
+                  {member.bio && (
+                    <div className="absolute inset-0 flex flex-col justify-end bg-ink/90 p-5 text-left opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                      <p className="text-sm leading-relaxed text-white/90">{member.bio}</p>
+                      <p className="mt-3 text-base font-bold text-white">{member.name}</p>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
