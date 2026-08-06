@@ -60,8 +60,9 @@ export function AboutPlaceholderImageManager({ image }: { image: string | null }
           &ldquo;Meet the Team&rdquo; Placeholder Image
         </h2>
         <p className="mt-1 text-sm text-ink-muted">
-          Shown on the About page instead of the default icon while no team members have been added
-          yet below (e.g. a company photo or logo). Has no effect once real team members exist.
+          Shown on the About page in this top card instead of the default icon (e.g. a company photo
+          or logo). Stays visible even after real team members are added below &mdash; remove it here
+          to go back to the default icon.
         </p>
       </div>
 

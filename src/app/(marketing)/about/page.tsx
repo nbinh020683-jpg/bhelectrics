@@ -71,7 +71,14 @@ export default async function AboutPage() {
             </div>
           </div>
 
-          {hasTeam ? (
+          {placeholderImage ? (
+            <div className="card overflow-hidden p-0">
+              {/* eslint-disable-next-line @next/next/no-img-element -- data URL of unknown
+                  dimensions; a plain <img> shows it at its full natural aspect ratio without
+                  cropping, which next/image's fixed width/height can't guarantee. */}
+              <img src={placeholderImage} alt="BH Electrics" className="block w-full h-auto" />
+            </div>
+          ) : hasTeam ? (
             <div className="card flex flex-col items-center justify-center gap-4 bg-surface-alt p-10 text-center">
               <span className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/8 text-primary">
                 <Users size={40} weight="duotone" />
@@ -81,13 +88,6 @@ export default async function AboutPage() {
                 Every technician on our team is licensed, background checked, and trained to the
                 highest safety standard. See the team below.
               </p>
-            </div>
-          ) : placeholderImage ? (
-            <div className="card overflow-hidden p-0">
-              {/* eslint-disable-next-line @next/next/no-img-element -- data URL of unknown
-                  dimensions; a plain <img> shows it at its full natural aspect ratio without
-                  cropping, which next/image's fixed width/height can't guarantee. */}
-              <img src={placeholderImage} alt="BH Electrics" className="block w-full h-auto" />
             </div>
           ) : (
             <div className="card flex flex-col items-center justify-center gap-4 bg-surface-alt p-10 text-center">
