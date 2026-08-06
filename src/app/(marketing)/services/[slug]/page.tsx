@@ -5,6 +5,7 @@ import { CheckCircle, Phone, CalendarCheck, ArrowRight } from "@phosphor-icons/r
 import { PageHero } from "@/components/ui/PageHero";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { FaqAccordion } from "@/components/ui/FaqAccordion";
+import { FaqJsonLd } from "@/components/seo/FaqJsonLd";
 import { services, getServiceBySlug } from "@/lib/services-data";
 import { ServiceIcon } from "@/lib/service-icons";
 import { EmergencyBanner } from "@/components/home/EmergencyBanner";
@@ -74,6 +75,7 @@ export default async function ServiceDetailPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceJsonLd) }}
       />
+      <FaqJsonLd items={service.faqs} />
 
       <PageHero
         breadcrumbs={[

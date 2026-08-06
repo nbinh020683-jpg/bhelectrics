@@ -5,6 +5,7 @@ import { MapPin, Phone, CheckCircle, ArrowRight } from "@phosphor-icons/react/ss
 import { PageHero } from "@/components/ui/PageHero";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { FaqAccordion } from "@/components/ui/FaqAccordion";
+import { FaqJsonLd } from "@/components/seo/FaqJsonLd";
 import { serviceAreaTowns, getTownBySlug } from "@/lib/service-areas-data";
 import { services } from "@/lib/services-data";
 import { ServiceIcon } from "@/lib/service-icons";
@@ -79,6 +80,7 @@ export default async function TownPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <FaqJsonLd items={faqs} />
 
       <PageHero
         breadcrumbs={[
