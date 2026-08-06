@@ -1,12 +1,17 @@
 import type { Metadata } from "next";
 import { getAllTeamMembers } from "@/lib/team-repository";
+import { getTeamPlaceholderImage } from "@/lib/about-settings";
 import { TeamManager } from "@/components/admin/TeamManager";
+import { AboutPlaceholderImageManager } from "@/components/admin/AboutPlaceholderImageManager";
 
 export const metadata: Metadata = { title: "Team" };
 export const dynamic = "force-dynamic";
 
 export default async function AdminTeamPage() {
-  const members = await getAllTeamMembers();
+  const [members, placeholderImage] = await Promise.all([
+    getAllTeamMembers(),
+    getTeamPlaceholderImage(),
+  ]);
 
   return (
     <div>
@@ -20,6 +25,10 @@ export default async function AdminTeamPage() {
       </p>
 
       <div className="mt-6">
+        <AboutPlaceholderImageManager image={placeholderImage} />
+      </div>
+
+      <div className="mt-8">
         <TeamManager members={members} />
       </div>
     </div>

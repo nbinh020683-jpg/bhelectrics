@@ -6,6 +6,7 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 import { siteConfig } from "@/lib/site-config";
 import { FinalCta } from "@/components/home/FinalCta";
 import { getAllTeamMembers } from "@/lib/team-repository";
+import { getTeamPlaceholderImage } from "@/lib/about-settings";
 
 export const metadata: Metadata = {
   title: "About Us",
@@ -25,10 +26,16 @@ const values = [
 const yearsInBusiness = new Date().getFullYear() - siteConfig.founded;
 
 export default async function AboutPage() {
-  const teamMembers = await getAllTeamMembers().catch((error) => {
-    console.error("Failed to load team members:", error);
-    return [];
-  });
+  const [teamMembers, placeholderImage] = await Promise.all([
+    getAllTeamMembers().catch((error) => {
+      console.error("Failed to load team members:", error);
+      return [];
+    }),
+    getTeamPlaceholderImage().catch((error) => {
+      console.error("Failed to load about placeholder image:", error);
+      return null;
+    }),
+  ]);
   const hasTeam = teamMembers.length > 0;
 
   return (
@@ -77,8 +84,18 @@ export default async function AboutPage() {
             </div>
           ) : (
             <div className="card flex flex-col items-center justify-center gap-4 bg-surface-alt p-10 text-center">
-              <span className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/8 text-primary">
-                <Users size={40} weight="duotone" />
+              <span className="relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-primary/8 text-primary">
+                {placeholderImage ? (
+                  <Image
+                    src={placeholderImage}
+                    alt="BH Electrics"
+                    fill
+                    unoptimized
+                    className="object-cover"
+                  />
+                ) : (
+                  <Users size={40} weight="duotone" />
+                )}
               </span>
               <p className="font-bold text-ink">Meet the Team</p>
               <p className="max-w-xs text-sm text-ink-muted">
