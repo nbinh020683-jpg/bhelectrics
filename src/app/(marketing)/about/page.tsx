@@ -1,15 +1,19 @@
 import type { Metadata } from "next";
-import { ShieldCheck, Certificate, HardHat, HeartStraight, Users } from "@phosphor-icons/react/ssr";
+import Image from "next/image";
+import { ShieldCheck, Certificate, HardHat, HeartStraight, Users, User } from "@phosphor-icons/react/ssr";
 import { PageHero } from "@/components/ui/PageHero";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { siteConfig } from "@/lib/site-config";
 import { FinalCta } from "@/components/home/FinalCta";
+import { getAllTeamMembers } from "@/lib/team-repository";
 
 export const metadata: Metadata = {
   title: "About Us",
   description: `Learn about BH Electrics, a locally owned, licensed electrical contractor based in Lynn, MA serving the North Shore since ${siteConfig.founded}.`,
   alternates: { canonical: "/about" },
 };
+
+export const dynamic = "force-dynamic";
 
 const values = [
   { icon: ShieldCheck, title: "Safety First", description: "Every job starts and ends with safety — for our crew, your family, and your property." },
@@ -20,7 +24,13 @@ const values = [
 
 const yearsInBusiness = new Date().getFullYear() - siteConfig.founded;
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const teamMembers = await getAllTeamMembers().catch((error) => {
+    console.error("Failed to load team members:", error);
+    return [];
+  });
+  const hasTeam = teamMembers.length > 0;
+
   return (
     <>
       <PageHero
@@ -54,20 +64,67 @@ export default function AboutPage() {
             </div>
           </div>
 
-          <div className="card flex flex-col items-center justify-center gap-4 bg-surface-alt p-10 text-center">
-            <span className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/8 text-primary">
-              <Users size={40} weight="duotone" />
-            </span>
-            <p className="font-bold text-ink">Meet the Team</p>
-            <p className="max-w-xs text-sm text-ink-muted">
-              Team photos and bios coming soon. Every technician on our team is licensed, background
-              checked, and trained to the highest safety standard.
-            </p>
-          </div>
+          {hasTeam ? (
+            <div className="card flex flex-col items-center justify-center gap-4 bg-surface-alt p-10 text-center">
+              <span className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/8 text-primary">
+                <Users size={40} weight="duotone" />
+              </span>
+              <p className="font-bold text-ink">Meet the Team</p>
+              <p className="max-w-xs text-sm text-ink-muted">
+                Every technician on our team is licensed, background checked, and trained to the
+                highest safety standard. See the team below.
+              </p>
+            </div>
+          ) : (
+            <div className="card flex flex-col items-center justify-center gap-4 bg-surface-alt p-10 text-center">
+              <span className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/8 text-primary">
+                <Users size={40} weight="duotone" />
+              </span>
+              <p className="font-bold text-ink">Meet the Team</p>
+              <p className="max-w-xs text-sm text-ink-muted">
+                Team photos and bios coming soon. Every technician on our team is licensed, background
+                checked, and trained to the highest safety standard.
+              </p>
+            </div>
+          )}
         </div>
       </section>
 
-      <section className="section-y bg-surface-alt">
+      {hasTeam && (
+        <section className="section-y bg-surface-alt">
+          <div className="container-page">
+            <SectionHeading eyebrow="Our People" title="The Team Behind the Work" />
+            <div className="mt-14 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
+              {teamMembers.map((member) => (
+                <div key={member.id} className="card p-6 text-center">
+                  <div className="relative mx-auto h-24 w-24 overflow-hidden rounded-full bg-primary/8">
+                    {member.photoData ? (
+                      <Image
+                        src={member.photoData}
+                        alt={member.name}
+                        fill
+                        unoptimized
+                        className="object-cover"
+                      />
+                    ) : (
+                      <span className="flex h-full w-full items-center justify-center text-primary">
+                        <User size={36} weight="fill" />
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-4 font-bold text-ink">{member.name}</p>
+                  {member.role && <p className="text-sm text-primary">{member.role}</p>}
+                  {member.bio && (
+                    <p className="mt-2 text-sm leading-relaxed text-ink-muted">{member.bio}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      <section className={`section-y ${hasTeam ? "" : "bg-surface-alt"}`}>
         <div className="container-page">
           <SectionHeading eyebrow="Our Values" title="What Guides Every Job We Take On" />
           <div className="mt-14 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">

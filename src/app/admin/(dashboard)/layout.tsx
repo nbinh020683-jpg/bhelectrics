@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowSquareOut, Newspaper, Images } from "@phosphor-icons/react/ssr";
+import { ArrowSquareOut, Newspaper, Images, Users } from "@phosphor-icons/react/ssr";
 import { Logo } from "@/components/ui/Logo";
 import { LogoutButton } from "@/components/admin/LogoutButton";
 import { AdminNavLink } from "@/components/admin/AdminNavLink";
@@ -21,6 +21,9 @@ export default function AdminDashboardLayout({
               </AdminNavLink>
               <AdminNavLink href="/admin/gallery" icon={<Images size={16} weight="fill" />}>
                 Gallery
+              </AdminNavLink>
+              <AdminNavLink href="/admin/team" icon={<Users size={16} weight="fill" />}>
+                Team
               </AdminNavLink>
             </nav>
           </div>
