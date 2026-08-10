@@ -33,7 +33,7 @@ export const siteConfig = {
   founded: 2010,
   license: {
     label: "MA Electrical License",
-    number: "License #24113-A",
+    number: "License #24112-A",
     note: "Official BH Electrics Massachusetts electrical contractor license number.",
   },
   social: {
