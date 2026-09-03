@@ -58,7 +58,7 @@ Nothing works until you generate credentials — there is no default password.
 node scripts/generate-admin-credentials.mjs "choose-a-strong-password"
 ```
 
-This prints three lines. Paste them into `.env.local` (local dev) and into your production environment (Hostinger's Node.js app environment variables — see [Section 6](#6-deploying-to-hostinger-business-web-hosting)):
+This prints three lines, already escaped for a `.env` file:
 
 ```env
 ADMIN_USERNAME=admin
@@ -66,7 +66,10 @@ ADMIN_PASSWORD_HASH=\$2b\$12\$....................................
 ADMIN_SESSION_SECRET=................................................
 ```
 
-> **Important:** keep the backslashes before every `$` in `ADMIN_PASSWORD_HASH` exactly as printed. Next.js's env loader treats an unescaped `$` as the start of a variable reference and will silently corrupt the password hash without `\$`. The generator script already escapes this correctly — just paste its output as-is.
+**Where to paste this depends on the destination — the escaping rule is different for each:**
+
+- **`.env.local` (local dev):** paste `ADMIN_PASSWORD_HASH` **with** the backslashes, exactly as printed. Next.js's env loader treats an unescaped `$` as the start of a variable reference and will silently corrupt the hash without `\$`.
+- **Hostinger's Node.js app environment variables** (individual "Add environment variable" field — see [Section 6](#6-deploying-to-hostinger-business-web-hosting)): paste the **raw hash, with the backslashes removed** — i.e. `$2b$12$....` not `\$2b\$12\$....`. Hostinger's own UI silently adds one layer of backslash-escaping when it saves the value; pasting the already-escaped form causes *double* escaping, which corrupts the hash and breaks login even though the code only undoes one layer. This exact mistake has bitten this project twice — always double-check with the diagnostic-endpoint trick below after any password change on Hostinger.
 
 Then sign in at `http://localhost:3000/admin` (or `https://bhelectrics.com/admin` in production) with the username/password you chose (not the hash).
 
@@ -79,6 +82,8 @@ Then sign in at `http://localhost:3000/admin` (or `https://bhelectrics.com/admin
 ### Changing the admin password later
 
 Re-run the generator script with a new password and update the env vars — no code changes needed. If you ever suspect the session secret is compromised, generate a new `ADMIN_SESSION_SECRET` too; this immediately invalidates all existing login sessions.
+
+Remember the different escaping rule for Hostinger described above (raw hash, no backslashes) — this is the single most common reason login breaks right after a password change.
 
 ### Daily auto-drafted posts (optional)
 
@@ -196,7 +201,7 @@ These are real issues hit while first deploying this app to Hostinger — check 
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| `/admin/login` says "Invalid username or password" even with the right password | Hostinger's Environment Variables UI has been observed inserting a backslash before every `$` in a saved value, corrupting the bcrypt hash's `$2b$12$...` delimiters | Already handled automatically in code (`src/lib/admin-credentials.ts` strips `\$` back to `$` before comparing) — if you still see this, redeploy so the latest code is actually running |
+| `/admin/login` says "Invalid username or password" even with the right password | Hostinger's Environment Variables UI inserts one backslash before every `\` and `$` in whatever value you paste. Code (`src/lib/admin-credentials.ts`) only undoes *one* layer of `\$` escaping, so if you paste the already-escaped hash (with backslashes) instead of the raw one, it gets double-escaped and stays broken | Paste the **raw, unescaped** hash into Hostinger (`$2b$12$....`, no backslashes) — not the `.env`-escaped form used for `.env.local`. See [Section 3](#3-blog-admin-panel) |
 | `/admin/posts` shows "Application error... server-side exception", Runtime logs show `Error: getaddrinfo ENOTFOUND <something>` | `DB_HOST` was set to something other than a real host (e.g. left as a placeholder, or a typo) | Set `DB_HOST` to `127.0.0.1` |
 | Runtime logs show `Access denied for user '<name>'@'::1'` | `DB_HOST=localhost` resolves to the IPv6 loopback `::1` in Node, but the MySQL user is only granted access from the IPv4 loopback | Set `DB_HOST` to `127.0.0.1` instead of `localhost` |
 | Runtime logs show `Access denied for user '<short-name>'@'...'` (the username looks truncated) | `DB_USER` (or `DB_NAME`) was set to just the name typed when creating the database, missing Hostinger's account-ID prefix | Use the full `u123456789_yourname` form for both `DB_USER` and `DB_NAME` |
