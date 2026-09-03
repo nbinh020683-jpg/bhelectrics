@@ -17,9 +17,9 @@ export default async function OpengraphImage() {
           flexDirection: "column",
           justifyContent: "center",
           padding: "80px",
-          backgroundColor: "#0F1E52",
+          backgroundColor: "#14171A",
           backgroundImage:
-            "radial-gradient(circle at 15% 15%, rgba(59,130,246,0.45), transparent 40%), radial-gradient(circle at 85% 90%, rgba(234,88,12,0.35), transparent 40%)",
+            "radial-gradient(circle at 15% 15%, rgba(219,138,70,0.25), transparent 40%), radial-gradient(circle at 85% 90%, rgba(219,138,70,0.14), transparent 40%)",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
@@ -30,12 +30,13 @@ export default async function OpengraphImage() {
               justifyContent: "center",
               width: 88,
               height: 88,
-              borderRadius: 20,
-              background: "linear-gradient(135deg, #3B82F6, #152B7A)",
+              borderRadius: 4,
+              background: "linear-gradient(135deg, #2A3136, #14171A)",
+              border: "1px solid rgba(219,138,70,0.5)",
             }}
           >
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
-              <path d="M13 2 6 14h5l-1 8 9-13h-6l1-7Z" fill="#FACC15" stroke="#152B7A" strokeWidth="0.5" />
+              <path d="M13 2 6 14h5l-1 8 9-13h-6l1-7Z" fill="#DB8A46" stroke="#14171A" strokeWidth="0.5" />
             </svg>
           </div>
           <span style={{ fontSize: 40, fontWeight: 700, color: "#FFFFFF" }}>BH Electrics</span>

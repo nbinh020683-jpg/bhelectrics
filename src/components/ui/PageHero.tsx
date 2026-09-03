@@ -32,8 +32,8 @@ export function PageHero({
             ))}
           </nav>
         )}
-        {eyebrow && <span className="eyebrow bg-white/10 text-caution">{eyebrow}</span>}
-        <h1 className="mt-4 max-w-3xl text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl">
+        {eyebrow && <span className="eyebrow text-accent-light">{eyebrow}</span>}
+        <h1 className="mt-4 max-w-3xl font-heading text-4xl font-black leading-[0.98] tracking-tight text-white sm:text-5xl">
           {title}
         </h1>
         {description && (

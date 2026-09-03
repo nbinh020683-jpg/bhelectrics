@@ -31,7 +31,7 @@
   h4,
   h5,
   h6 {
-    @apply font-heading font-semibold text-ink;
+    @apply font-heading font-bold text-ink;
   }
 
   ::selection {
@@ -39,7 +39,7 @@
   }
 
   :focus-visible {
-    outline: 2px solid #1e40af;
+    outline: 2px solid #a8571f;
     outline-offset: 2px;
     border-radius: 2px;
   }
@@ -55,7 +55,7 @@
   }
 
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-6 py-3.5 text-base font-semibold transition-all duration-200 cursor-pointer select-none;
+    @apply inline-flex items-center justify-center gap-2 rounded px-6 py-3.5 text-base font-semibold transition-all duration-200 cursor-pointer select-none;
   }
 
   .btn-primary {
@@ -63,7 +63,7 @@
   }
 
   .btn-secondary {
-    @apply btn bg-white text-primary border-2 border-primary/15 hover:border-primary/40 hover:bg-primary/5 active:scale-[0.98];
+    @apply btn bg-white text-ink border-2 border-ink/15 hover:border-ink/35 hover:bg-ink/5 active:scale-[0.98];
   }
 
   .btn-ghost-on-dark {
@@ -71,14 +71,51 @@
   }
 
   .eyebrow {
-    @apply inline-flex items-center gap-2 rounded-full bg-primary/8 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-primary;
+    @apply inline-flex items-center gap-2.5 font-mono text-xs font-semibold uppercase tracking-widest text-ink-soft;
+  }
+
+  .eyebrow::before {
+    content: "";
+    display: inline-block;
+    width: 18px;
+    height: 1px;
+    background-color: currentColor;
+    opacity: 0.55;
   }
 
   .card {
-    @apply rounded-2xl border border-border bg-white shadow-card transition-shadow duration-300;
+    @apply rounded-lg border border-border bg-white shadow-card transition-shadow duration-300;
   }
 
   .card-hover {
     @apply hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300;
+  }
+
+  .corner-marks {
+    @apply relative;
+  }
+
+  .corner-marks::before,
+  .corner-marks::after {
+    content: "";
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-color: #db8a46;
+    pointer-events: none;
+  }
+
+  .corner-marks::before {
+    top: -1px;
+    left: -1px;
+    border-top: 2px solid;
+    border-left: 2px solid;
+  }
+
+  .corner-marks::after {
+    bottom: -1px;
+    right: -1px;
+    border-bottom: 2px solid;
+    border-right: 2px solid;
   }
 }

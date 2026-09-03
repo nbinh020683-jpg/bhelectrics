@@ -1,19 +1,26 @@
 import type { Metadata } from "next";
-import { Poppins, Open_Sans } from "next/font/google";
+import { Big_Shoulders, Work_Sans, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { siteConfig } from "@/lib/site-config";
 
-const poppins = Poppins({
+const bigShouldersDisplay = Big_Shoulders({
   subsets: ["latin"],
-  weight: ["500", "600", "700"],
-  variable: "--font-poppins",
+  weight: ["700", "800", "900"],
+  variable: "--font-display",
   display: "swap",
 });
 
-const openSans = Open_Sans({
+const workSans = Work_Sans({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
-  variable: "--font-open-sans",
+  variable: "--font-body",
+  display: "swap",
+});
+
+const plexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["500", "600"],
+  variable: "--font-mono",
   display: "swap",
 });
 
@@ -58,7 +65,10 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${poppins.variable} ${openSans.variable}`}>
+    <html
+      lang="en"
+      className={`${bigShouldersDisplay.variable} ${workSans.variable} ${plexMono.variable}`}
+    >
       <body className="flex min-h-screen flex-col">{children}</body>
     </html>
   );

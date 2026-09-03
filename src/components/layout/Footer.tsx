@@ -41,7 +41,7 @@ export function Footer() {
             </a>
           </div>
           <div className="mt-6 flex items-start gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-xs text-white/70">
-            <ShieldCheck size={18} weight="fill" className="mt-0.5 shrink-0 text-caution" />
+            <ShieldCheck size={18} weight="fill" className="mt-0.5 shrink-0 text-brass" />
             <span>
               Fully licensed &amp; insured &mdash; {siteConfig.license.number}
             </span>

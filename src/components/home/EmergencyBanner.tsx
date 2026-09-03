@@ -8,14 +8,14 @@ export function EmergencyBanner() {
         className="absolute inset-x-0 top-0 h-2"
         style={{
           backgroundImage:
-            "repeating-linear-gradient(135deg, #FACC15 0 16px, #0F172A 16px 32px)",
+            "repeating-linear-gradient(135deg, #DB8A46 0 16px, #14171A 16px 32px)",
         }}
       />
       <div
         className="absolute inset-x-0 bottom-0 h-2"
         style={{
           backgroundImage:
-            "repeating-linear-gradient(135deg, #FACC15 0 16px, #0F172A 16px 32px)",
+            "repeating-linear-gradient(135deg, #DB8A46 0 16px, #14171A 16px 32px)",
         }}
       />
       <div className="container-page flex flex-col items-center gap-6 py-14 text-center sm:flex-row sm:justify-between sm:text-left">

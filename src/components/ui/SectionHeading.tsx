@@ -16,12 +16,12 @@ export function SectionHeading({
       className={`max-w-2xl ${align === "center" ? "mx-auto text-center" : "text-left"}`}
     >
       {eyebrow && (
-        <span className={light ? "eyebrow bg-white/10 text-caution" : "eyebrow"}>
+        <span className={light ? "eyebrow text-accent-light" : "eyebrow"}>
           {eyebrow}
         </span>
       )}
       <h2
-        className={`mt-4 text-3xl font-bold tracking-tight sm:text-4xl ${
+        className={`mt-4 font-heading text-3xl font-black tracking-tight sm:text-4xl ${
           light ? "text-white" : "text-ink"
         }`}
       >
