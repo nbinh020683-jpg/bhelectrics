@@ -36,7 +36,7 @@ export function LocalBusinessJsonLd() {
     telephone: siteConfig.phone,
     email: siteConfig.email,
     priceRange: "$$",
-    image: `${siteConfig.url}/og-image.jpg`,
+    image: `${siteConfig.url}/opengraph-image`,
     address: {
       "@type": "PostalAddress",
       streetAddress: siteConfig.address.street,
