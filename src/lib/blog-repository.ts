@@ -61,10 +61,14 @@ export function estimateReadingTime(markdown: string): string {
 
 export async function getPublishedPosts(): Promise<PostRecord[]> {
   await ensureSchema();
+  // Excludes content_markdown — the list view (and the sitemap) only ever
+  // needs the excerpt/metadata, and that column can be tens of KB per post.
   const [rows] = await getPool().query<PostRow[]>(
-    "SELECT * FROM posts WHERE status = 'published' ORDER BY published_at DESC, created_at DESC"
+    `SELECT id, slug, title, excerpt, meta_description, category, cover_image,
+            status, published_at, created_at, updated_at
+     FROM posts WHERE status = 'published' ORDER BY published_at DESC, created_at DESC`
   );
-  return rows.map(mapRow);
+  return rows.map((row) => ({ ...mapRow(row as PostRow), contentMarkdown: "" }));
 }
 
 export async function getPublishedPostBySlug(slug: string): Promise<PostRecord | undefined> {

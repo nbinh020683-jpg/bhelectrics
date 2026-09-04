@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import sharp from "sharp";
 
 export const runtime = "nodejs";
 
@@ -31,7 +32,23 @@ export async function POST(request: NextRequest) {
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());
-  const dataUrl = `data:${file.type};base64,${buffer.toString("base64")}`;
+
+  // Uploads are stored as base64 in MySQL (see comment above), which means
+  // every uncompressed byte here gets re-downloaded by every visitor on
+  // every page view — resize and re-encode to WebP so a full-resolution
+  // phone photo doesn't turn a page into a multi-megabyte download.
+  // Animated GIFs are passed through untouched since re-encoding would
+  // flatten them to a single frame.
+  let dataUrl: string;
+  if (file.type === "image/gif") {
+    dataUrl = `data:${file.type};base64,${buffer.toString("base64")}`;
+  } else {
+    const optimized = await sharp(buffer)
+      .resize({ width: 1600, height: 1600, fit: "inside", withoutEnlargement: true })
+      .webp({ quality: 80 })
+      .toBuffer();
+    dataUrl = `data:image/webp;base64,${optimized.toString("base64")}`;
+  }
 
   return NextResponse.json({ coverImage: dataUrl }, { status: 201 });
 }
