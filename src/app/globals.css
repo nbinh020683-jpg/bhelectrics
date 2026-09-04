@@ -71,7 +71,7 @@
   }
 
   .eyebrow {
-    @apply inline-flex items-center gap-2.5 font-mono text-xs font-semibold uppercase tracking-widest text-ink-soft;
+    @apply inline-flex items-center gap-2.5 font-mono text-xs font-semibold uppercase tracking-widest text-ink-muted;
   }
 
   .eyebrow::before {
