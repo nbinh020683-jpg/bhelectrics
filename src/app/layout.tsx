@@ -69,6 +69,10 @@ export default function RootLayout({
       lang="en"
       className={`${bigShouldersDisplay.variable} ${workSans.variable} ${plexMono.variable}`}
     >
+      <head>
+        <link rel="preconnect" href="https://embed.tawk.to" />
+        <link rel="preconnect" href="https://va.tawk.to" />
+      </head>
       <body className="flex min-h-screen flex-col">{children}</body>
     </html>
   );
