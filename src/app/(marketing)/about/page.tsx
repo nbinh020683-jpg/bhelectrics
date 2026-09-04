@@ -17,10 +17,10 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 const values = [
-  { icon: ShieldCheck, title: "Safety First", description: "Every job starts and ends with safety — for our crew, your family, and your property." },
-  { icon: Certificate, title: "Code Compliance", description: "All work meets National Electrical Code standards and Massachusetts amendments." },
-  { icon: HardHat, title: "Craftsmanship", description: "We treat every job, big or small, with the same attention to detail." },
-  { icon: HeartStraight, title: "Honesty", description: "Clear pricing, honest recommendations, and no upselling work you don't need." },
+  { icon: ShieldCheck, title: "De-Energized Before We Diagnose", description: "No live-wire troubleshooting — every circuit is shut off and verified dead before we open a panel or outlet." },
+  { icon: Certificate, title: "Code Compliance, Checked", description: "Every installation is inspected against the National Electrical Code and Massachusetts amendments before we call a job done." },
+  { icon: HardHat, title: "Licensed, Not Subcontracted", description: `Every job is performed by a Massachusetts-licensed electrician under ${siteConfig.license.number} — never handed off to an unlicensed helper.` },
+  { icon: HeartStraight, title: "Written First, Always", description: "You get an itemized, written estimate before we touch a wire — not a verbal number that changes later." },
 ];
 
 const yearsInBusiness = new Date().getFullYear() - siteConfig.founded;

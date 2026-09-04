@@ -5,7 +5,7 @@ const steps = [
   { icon: Phone, title: "Call or Request Online", description: "Reach us by phone or submit a quote request — we respond quickly, every time." },
   { icon: ClipboardText, title: "On-Site Assessment", description: "A licensed electrician evaluates the job and explains your options in plain language." },
   { icon: FileText, title: "Upfront Written Quote", description: "You approve a clear, itemized estimate before any work begins. No surprises." },
-  { icon: CheckCircle, title: "Quality Work, Guaranteed", description: "We complete the job to code, test everything, and clean up after ourselves." },
+  { icon: CheckCircle, title: "Tested Before We Leave", description: "We complete the job to code, test every circuit, and clean up after ourselves." },
 ];
 
 export function ProcessSteps() {

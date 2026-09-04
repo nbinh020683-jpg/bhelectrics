@@ -1,4 +1,5 @@
 import type { IconWeight } from "@phosphor-icons/react";
+import { siteConfig } from "@/lib/site-config";
 
 export type ServiceItem = {
   slug: string;
@@ -99,7 +100,7 @@ export const services: ServiceItem[] = [
     ],
     faqs: [
       { question: "What counts as an electrical emergency?", answer: "Sparking outlets, burning smells, smoke, exposed wiring, a downed power line, or a total loss of power are all situations that warrant an emergency call." },
-      { question: "How fast can you respond?", answer: "Response times vary by location and time of day, but emergency calls are always prioritized over routine scheduling." },
+      { question: "How fast can you respond?", answer: `Call ${siteConfig.phone} and we'll give you a real-time ETA on that call before you decide anything. Every emergency call jumps ahead of scheduled work, and we dispatch whichever licensed electrician is closest to you.` },
       { question: "Is emergency service more expensive?", answer: "Emergency and after-hours rates differ from standard scheduling, and we always quote pricing before beginning work." },
     ],
     featured: true,
