@@ -29,20 +29,21 @@ export default function ServicesPage() {
         <div className="container-page">
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {services.map((service) => (
-              <div key={service.slug} className="card flex flex-col p-7">
-                <span className="flex h-13 w-13 items-center justify-center rounded-xl bg-primary/8 p-3 text-primary">
+              <Link
+                key={service.slug}
+                href={`/services/${service.slug}`}
+                className="card card-hover group flex flex-col p-7"
+              >
+                <span className="flex h-13 w-13 items-center justify-center rounded-xl bg-primary/8 p-3 text-primary transition-colors group-hover:bg-accent group-hover:text-white">
                   <ServiceIcon name={service.icon} size={28} weight="duotone" />
                 </span>
                 <h2 className="mt-5 text-lg font-bold text-ink">{service.name}</h2>
                 <p className="mt-2.5 flex-1 text-sm leading-relaxed text-ink-muted">{service.heroDescription}</p>
-                <Link
-                  href={`/services/${service.slug}`}
-                  className="mt-5 inline-flex items-center gap-1.5 text-sm font-bold text-primary"
-                >
+                <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-bold text-primary">
                   View service details
-                  <ArrowRight size={16} weight="bold" />
-                </Link>
-              </div>
+                  <ArrowRight size={16} weight="bold" className="transition-transform group-hover:translate-x-1" />
+                </span>
+              </Link>
             ))}
           </div>
 
